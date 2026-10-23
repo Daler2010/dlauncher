@@ -31,5 +31,7 @@ export function initUpdater(send: (s: UpdateState) => void): void {
 }
 
 export function installUpdate(): void {
-  if (state.status === 'ready') autoUpdater.quitAndInstall()
+  // Тихо (без мастера установки) и сразу запустить новую версию:
+  // мастер в конце пытался открыть ярлык из «Пуска» раньше, чем тот создавался
+  if (state.status === 'ready') autoUpdater.quitAndInstall(true, true)
 }
