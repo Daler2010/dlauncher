@@ -1,0 +1,45 @@
+{
+  "name": "dlauncher",
+  "productName": "DLauncher",
+  "version": "0.2.0",
+  "repository": "https://github.com/Daler2010/dlauncher",
+  "description": "DLauncher — лаунчер Minecraft",
+  "author": "Daler",
+  "main": "./out/main/index.js",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
+    "build:win": "electron-vite build && electron-builder --win",
+    "release": "electron-vite build && electron-builder --win --publish always"
+  },
+  "dependencies": {
+    "@xmcl/core": "2.15.1",
+    "@xmcl/installer": "6.1.2",
+    "@xmcl/task": "4.1.1",
+    "@xmcl/unzip": "2.1.2",
+    "electron-updater": "6.8.9",
+    "undici": "7.2.3"
+  },
+  "devDependencies": {
+    "@fontsource/golos-text": "^5.3.0",
+    "@fontsource/jetbrains-mono": "^5.3.0",
+    "@fontsource/unbounded": "^5.3.0",
+    "@types/node": "^24.19.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "dompurify": "^3.4.17",
+    "electron": "^45.0.0",
+    "electron-builder": "^26.15.3",
+    "electron-vite": "^6.0.0",
+    "marked": "^18.1.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "skinview3d": "^3.4.2",
+    "typescript": "^5.9.3",
+    "vite": "^8.3.5",
+    "zustand": "^5.0.16"
+  }
+}

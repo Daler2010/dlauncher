@@ -1,0 +1,11 @@
+{
+  "server": {
+    "name": "Анархия",
+    "motd": "Выживание без правил: кланы, дуэли, аирдропы, кейсы.",
+    "host": "practically-edges.tun.ply.gg",
+    "version": "1.21.1",
+    "slots": 30
+  },
+  "skinServer": null,
+  "announcements": []
+}

@@ -1,0 +1,24 @@
+appId: com.daler.dlauncher
+productName: DLauncher
+directories:
+  buildResources: build
+  output: dist
+files:
+  - out/**
+  - package.json
+win:
+  target: nsis
+  icon: build/icon.png
+  artifactName: DLauncher-Setup-${version}.exe
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: always
+  shortcutName: DLauncher
+  installerIcon: build/icon.ico
+  uninstallerIcon: build/icon.ico
+publish:
+  provider: github
+  owner: Daler2010
+  repo: dlauncher
+  releaseType: release

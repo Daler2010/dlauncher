@@ -1,0 +1,7 @@
+node_modules/
+out/
+dist/
+server-plugin/build/
+*.log
+.DS_Store
+electron.vite.config.ts.*.mjs
