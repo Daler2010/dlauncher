@@ -20,6 +20,7 @@ nsis:
   shortcutName: DLauncher
   installerIcon: build/icon.ico
   uninstallerIcon: build/icon.ico
+  include: build/installer.nsh
 publish:
   provider: github
   owner: Daler2010
