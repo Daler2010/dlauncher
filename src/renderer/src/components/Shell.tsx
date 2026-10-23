@@ -73,6 +73,7 @@ export function TopBar(): React.JSX.Element {
 
 const nav: { page: Page; label: string; icon: IconName }[] = [
   { page: 'home', label: 'Главная', icon: 'home' },
+  { page: 'profile', label: 'Профиль', icon: 'user' },
   { page: 'library', label: 'Сборки', icon: 'library' },
   { page: 'discover', label: 'Каталог', icon: 'compass' },
   { page: 'skins', label: 'Скины', icon: 'shirt' },

@@ -51,7 +51,11 @@ export async function syncSkin(): Promise<SkinSync> {
   if (!account || !skinServer) return (lastSync = { status: 'off', message: 'Сервер скинов не настроен' })
   const active = activeSkin()
   const url = `${skinServer.replace(/\/$/, '')}/api/skins/${account.name}`
-  const headers: Record<string, string> = { 'X-DL-Token': tokenFor(account.id) }
+  const headers: Record<string, string> = {
+    'X-DL-Token': tokenFor(account.id),
+    // Выбор плаща уходит на сервер вместе со скином
+    'X-DL-Cape': store.capeChoice[account.id] ?? 'rank'
+  }
   try {
     let res: Response
     if (active) {
@@ -200,6 +204,32 @@ export async function defaultSkin(): Promise<string | null> {
   return null
 }
 
+/**
+ * Свой плащ ранга кладём рядом со своим скином в LocalSkin: CustomSkinLoader берёт текстуры
+ * своего игрока оттуда и может не пойти за плащом на сервер. Плащи других — с сервера.
+ */
+async function applyCape(target: string): Promise<void> {
+  const account = activeAccount()
+  const { skinServer } = await getRemote()
+  if (!account || !skinServer || store.capeChoice[account.id] === 'off') {
+    await rm(target, { force: true })
+    return
+  }
+  try {
+    const root = skinServer.replace(/\/$/, '')
+    const profile = (await (await fetch(`${root}/csl/${account.name}.json`, { signal: AbortSignal.timeout(5000) })).json()) as { cape?: string }
+    if (!profile.cape) {
+      await rm(target, { force: true })
+      return
+    }
+    const png = Buffer.from(await (await fetch(`${root}/csl/textures/${profile.cape}`, { signal: AbortSignal.timeout(5000) })).arrayBuffer())
+    mkdirSync(join(target, '..'), { recursive: true })
+    await writeFile(target, png)
+  } catch {
+    // Сервер недоступен — оставляем плащ с прошлого запуска
+  }
+}
+
 /* ---------- Скин в игре через CustomSkinLoader ---------- */
 
 export const SKIN_MOD = 'customskinloader'
@@ -228,6 +258,7 @@ export async function applySkinToInstance(gameDir: string, nick: string): Promis
   mkdirSync(join(cslDir, 'LocalSkin', 'skins'), { recursive: true })
   if (active) await copyFile(active.path, target)
   else await rm(target, { force: true })
+  await applyCape(join(cslDir, 'LocalSkin', 'capes', nick + '.png'))
 
   const { skinServer } = await getRemote()
   const configPath = join(cslDir, 'CustomSkinLoader.json')

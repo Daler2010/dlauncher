@@ -63,7 +63,11 @@ const api: DLApi = {
     defaultSkin: () => invoke('skins:defaultSkin')
   },
   server: {
-    status: (host, port) => invoke('server:status', host, port)
+    status: (host, port) => invoke('server:status', host, port),
+    profile: () => invoke('server:profile'),
+    info: () => invoke('server:info'),
+    capes: () => invoke('server:capes'),
+    setCape: (choice) => invoke('server:setCape', choice)
   },
   news: {
     list: () => invoke('news:list')

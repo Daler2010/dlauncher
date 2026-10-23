@@ -37,7 +37,7 @@ function SkinThumb({ skin }: { skin: Skin }): React.JSX.Element {
 }
 
 export function Skins(): React.JSX.Element {
-  const { skins, setSkins, notify, accounts } = useApp()
+  const { skins, setSkins, notify, accounts, profile } = useApp()
   const { url, slim } = useActiveSkin()
   const nick = accounts.accounts.find((a) => a.id === accounts.activeId)?.name ?? 'Игрок'
   const canvas = useRef<HTMLCanvasElement>(null)
@@ -63,6 +63,15 @@ export function Skins(): React.JSX.Element {
     if (url) void v.loadSkin(url, { model: slim ? 'slim' : 'default' })
     else v.loadSkin(null)
   }, [url, slim])
+
+  // Плащ ранга с сервера — чтобы скин примерялся вместе с ним
+  const capeUrl = profile?.ok ? profile.data.capeUrl : null
+  useEffect(() => {
+    const v = viewer.current
+    if (!v) return
+    if (capeUrl) void v.loadCape(capeUrl).catch(() => v.loadCape(null))
+    else v.loadCape(null)
+  }, [capeUrl])
 
   useEffect(() => {
     if (viewer.current) viewer.current.animation = makeAnimation(anim)

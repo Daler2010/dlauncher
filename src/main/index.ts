@@ -32,6 +32,7 @@ import { installModpack } from './game/modpack'
 import { listVersions } from './game/versions'
 import { listNews } from './news'
 import { dataDir, instanceDir } from './paths'
+import { getCapes, getProfile, getServerInfo, setCape } from './profile'
 import { getRemote } from './remote'
 import { pingServer } from './server-ping'
 import { initUpdater, installUpdate, updateState } from './updater'
@@ -152,6 +153,10 @@ function registerIpc(): void {
   ipcMain.handle('skins:defaultSkin', () => defaultSkin())
 
   ipcMain.handle('server:status', (_e, host: string, port?: number) => pingServer(host, port))
+  ipcMain.handle('server:profile', () => getProfile())
+  ipcMain.handle('server:info', () => getServerInfo())
+  ipcMain.handle('server:capes', () => getCapes())
+  ipcMain.handle('server:setCape', (_e, choice: string) => setCape(choice))
   ipcMain.handle('news:list', () => listNews())
 
   ipcMain.handle('game:launch', (_e, req: LaunchRequest) => launchGame(req, gameEvents))

@@ -21,6 +21,8 @@ interface StoreData {
   activeSkins: Record<string, string>
   /** id аккаунта → секрет, которым ник закреплён на сервере скинов */
   skinTokens: Record<string, string>
+  /** id аккаунта → выбранный плащ: "rank" (по умолчанию), "off" или id из каталога сервера */
+  capeChoice: Record<string, string>
 }
 
 function defaultMemory(): number {
@@ -48,7 +50,8 @@ function defaults(): StoreData {
     instances: [],
     skins: [],
     activeSkins: {},
-    skinTokens: {}
+    skinTokens: {},
+    capeChoice: {}
   }
 }
 

@@ -251,6 +251,52 @@ export interface RemoteConfig {
   announcements: Announcement[]
 }
 
+/* ---------- Профиль игрока с сервера (плагин DLauncherSkins) ---------- */
+
+export interface PlayerProfile {
+  name: string
+  /** Группа LuckPerms: default, vip, premium, elite, legend, titan, helper, moder, admin */
+  group: string
+  prefix: string | null
+  /** URL текстуры плаща ранга, если он есть и включён */
+  capeUrl: string | null
+  /** Есть ли плащ за ранг игрока */
+  capeAvailable: boolean
+  /** Выбор игрока: "rank", "off" или id плаща из каталога */
+  capeChoice: string
+  clan: { tag: string; name: string } | null
+  known: boolean
+  online: boolean
+  balance: number | null
+  kills: number
+  deaths: number
+  mobKills: number
+  playMinutes: number
+  firstPlayed: number
+  lastSeen: number
+}
+
+export interface TopEntry {
+  name: string
+  value: number
+  skinUrl: string | null
+}
+
+export interface ServerInfo {
+  max: number
+  online: { name: string; group: string; skinUrl: string | null }[]
+  tops: { balance: TopEntry[]; kills: TopEntry[]; playtime: TopEntry[] }
+}
+
+export interface CapeCatalog {
+  /** Плащи за ранги: id = группа LuckPerms */
+  rank: { id: string; url: string }[]
+  /** Плащи, которые может выбрать любой игрок */
+  free: { id: string; url: string }[]
+}
+
+export type Fetched<T> = { ok: true; data: T } | { ok: false; error: string; notConfigured?: boolean }
+
 /** Скин активного аккаунта на сервере скинов */
 export interface SkinSync {
   status: 'off' | 'synced' | 'error' | 'conflict'
@@ -312,6 +358,14 @@ export interface DLApi {
   }
   server: {
     status(host: string, port?: number): Promise<ServerStatus>
+    /** Профиль активного аккаунта с сервера DLauncher */
+    profile(): Promise<Fetched<PlayerProfile>>
+    /** Онлайн и топы с сервера DLauncher */
+    info(): Promise<Fetched<ServerInfo>>
+    /** Каталог плащей сервера */
+    capes(): Promise<Fetched<CapeCatalog>>
+    /** Выбрать плащ: "rank", "off" или id из каталога */
+    setCape(choice: string): Promise<Fetched<PlayerProfile>>
   }
   news: {
     list(): Promise<NewsItem[]>

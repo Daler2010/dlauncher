@@ -73,7 +73,7 @@ export async function launchGame(req: LaunchRequest, events: GameEvents): Promis
       const needSkins = Boolean(activeSkin() || skinServer)
       const slugs = [...(inst.optimized ? PERF_MODS.map((m) => m.slug) : []), ...(needSkins ? [SKIN_MOD] : [])]
       if (slugs.length) await ensureMods(gamePath, slugs, inst.version, inst.loader, runner)
-      if (needSkins && (await applySkinToInstance(gamePath, account.name))) say('Скин подключён через CustomSkinLoader')
+      if (needSkins && (await applySkinToInstance(gamePath, account.name))) say('Скин и плащ подключены через CustomSkinLoader')
       void syncSkin()
     }
     await writeDefaultOptions(gamePath)

@@ -1,13 +1,14 @@
 name: DLauncherSkins
-version: '1.0.0'
+version: '1.1.0'
 main: dev.daler.dlskins.DLauncherSkins
 api-version: '1.21'
 author: Daler
-description: Сервер скинов для DLauncher (CustomSkinAPI)
+description: Сервер DLauncher — скины, плащи рангов, профили игроков
+softdepend: [LuckPerms, Vault, SimpleClans, Essentials]
 commands:
   dlskins:
     description: Управление скинами DLauncher
-    usage: /dlskins <list|reset ник>
+    usage: /dlskins <list|reset ник|reload>
     permission: dlskins.admin
 permissions:
   dlskins.admin:

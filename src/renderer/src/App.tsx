@@ -6,6 +6,7 @@ import { Home } from './pages/Home'
 import { InstancePage } from './pages/InstancePage'
 import { Library } from './pages/Library'
 import { News } from './pages/News'
+import { Profile } from './pages/Profile'
 import { Settings } from './pages/Settings'
 import { Skins } from './pages/Skins'
 import { useApp } from './store'
@@ -17,6 +18,8 @@ function CurrentPage(): React.JSX.Element {
   switch (page) {
     case 'home':
       return <Home />
+    case 'profile':
+      return <Profile />
     case 'library':
       return <Library />
     case 'instance':

@@ -1,7 +1,9 @@
 import { create } from 'zustand'
 import type {
   AccountState,
+  Fetched,
   GameExit,
+  PlayerProfile,
   GameState,
   InstallProgress,
   Instance,
@@ -13,7 +15,7 @@ import type {
   UpdateState
 } from '@shared/types'
 
-export type Page = 'home' | 'library' | 'instance' | 'discover' | 'skins' | 'news' | 'settings' | 'console'
+export type Page = 'home' | 'profile' | 'library' | 'instance' | 'discover' | 'skins' | 'news' | 'settings' | 'console'
 
 const MAX_LOG = 4000
 
@@ -36,6 +38,9 @@ interface AppState {
   remote: RemoteConfig | null
   update: UpdateState
   version: string
+  /** Профиль активного аккаунта с сервера DLauncher; null — ещё грузится */
+  profile: Fetched<PlayerProfile> | null
+  loadProfile(): Promise<void>
 
   go(page: Page): void
   openInstance(id: string): void
@@ -70,6 +75,11 @@ export const useApp = create<AppState>((set, get) => ({
   remote: null,
   update: { status: 'idle' },
   version: '',
+  profile: null,
+
+  async loadProfile() {
+    set({ profile: await window.dl.server.profile() })
+  },
 
   go: (page) => set({ page }),
   openInstance: (id) => set({ page: 'instance', openInstanceId: id }),
@@ -91,6 +101,7 @@ export const useApp = create<AppState>((set, get) => ({
     void window.dl.remote.get().then((remote) => set({ remote }))
     void window.dl.system.version().then((version) => set({ version }))
     void window.dl.update.state().then((update) => set({ update }))
+    void get().loadProfile()
 
     window.dl.on.update((update) => set({ update }))
     window.dl.on.progress((progress) => set({ progress }))
@@ -120,8 +131,9 @@ export const useApp = create<AppState>((set, get) => ({
   },
 
   async setAccounts(accounts) {
-    // У каждого аккаунта свой скин
-    set({ accounts, skins: await window.dl.skins.list() })
+    // У каждого аккаунта свой скин и свой профиль на сервере
+    set({ accounts, skins: await window.dl.skins.list(), profile: null })
+    void get().loadProfile()
   },
 
   setSkins: (skins) => set({ skins }),
