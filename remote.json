@@ -7,5 +7,27 @@
     "slots": 30
   },
   "skinServer": null,
-  "announcements": []
+  "announcements": [],
+  "serverPack": {
+    "version": "1.21.1",
+    "loader": "fabric",
+    "revision": 1,
+    "mods": [
+      { "slug": "modmenu", "note": "Список модов и их настройки прямо из главного меню" },
+      { "slug": "sodium-extra", "note": "Дополнительные настройки графики: туман, частицы, анимации" },
+      { "slug": "reeses-sodium-options", "note": "Удобное меню настроек графики с вкладками" },
+      { "slug": "appleskin", "note": "Показывает сытость и насыщение еды — проще не голодать в PvP" },
+      { "slug": "shulkerboxtooltip", "note": "Содержимое шалкеров при наведении — на анархии без него никуда" },
+      { "slug": "mouse-tweaks", "note": "Быстрое перекладывание предметов мышкой" },
+      { "slug": "betterf3", "note": "Аккуратный экран отладки F3 с цветами и разделами" },
+      { "slug": "3dskinlayers", "note": "Объёмный второй слой скина — шляпы и куртки выглядят 3D" },
+      { "slug": "better-ping-display-fabric", "note": "Пинг игроков цифрами в списке на Tab" },
+      { "slug": "chat-heads", "note": "Головы игроков рядом с их сообщениями в чате" },
+      { "slug": "continuity", "note": "Соединённые текстуры стекла и блоков для ресурспаков" },
+      { "slug": "zoomify", "optional": true, "default": true, "note": "Плавный зум на клавишу C" },
+      { "slug": "iris", "optional": true, "default": true, "note": "Нужен для шейдеров" },
+      { "slug": "xaeros-minimap", "optional": true, "default": false, "note": "Миникарта в углу экрана" },
+      { "slug": "xaeros-world-map", "optional": true, "default": false, "note": "Полная карта мира на клавишу M" }
+    ]
+  }
 }

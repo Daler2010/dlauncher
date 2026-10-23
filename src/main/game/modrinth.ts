@@ -275,20 +275,21 @@ export async function ensureMods(
   const modsDir = join(gameDir, 'mods')
   mkdirSync(modsDir, { recursive: true })
   const manifestPath = join(modsDir, MANIFEST)
-  let managed: ManagedMods = { gameVersion, loader, files: {} }
+  // Что лаунчер ставил в прошлый раз — даже если список или версия сменились, чтобы убрать лишнее
+  let managed: ManagedMods & { slugs?: string[] } = { gameVersion, loader, files: {} }
   try {
-    const saved = JSON.parse(await readFile(manifestPath, 'utf8')) as ManagedMods & { slugs?: string[] }
-    if (saved.gameVersion === gameVersion && saved.loader === loader && sameSet(saved.slugs ?? [], slugs)) managed = saved
+    managed = JSON.parse(await readFile(manifestPath, 'utf8')) as ManagedMods & { slugs?: string[] }
   } catch {
     // Первый запуск
   }
 
+  const unchanged = managed.gameVersion === gameVersion && managed.loader === loader && sameSet(managed.slugs ?? [], slugs)
   const allPresent =
     Object.keys(managed.files).length > 0 &&
     Object.values(managed.files).every((f) => existsSync(join(modsDir, f)) || existsSync(join(modsDir, f + '.disabled')))
-  if (allPresent) return
+  if (unchanged && allPresent) return
 
-  await runner.custom('Служебные моды', async (update) => {
+  await runner.custom('Моды сборки', async (update) => {
     const wanted = new Map<string, MrVersion>()
     const queue = [...slugs]
     while (queue.length) {
@@ -320,6 +321,12 @@ export async function ensureMods(
       files++
       next.files[v.project_id] = file.filename
       update(bytes, totalBytes, files)
+    }
+    // Моды, которые ставил лаунчер, но их больше нет в списке (убраны из сборки или выключены игроком)
+    for (const [project, old] of Object.entries(managed.files)) {
+      if (next.files[project]) continue
+      await rm(join(modsDir, old), { force: true })
+      await rm(join(modsDir, old + '.disabled'), { force: true })
     }
     await writeFile(manifestPath, JSON.stringify(next, null, 2))
   })

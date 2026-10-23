@@ -55,7 +55,10 @@ export function Home(): React.JSX.Element {
   const announcements = remote?.announcements ?? []
 
   const selected = instances.find((i) => i.id === settings?.selectedInstanceId) ?? instances[0]
-  const serverInstance = selected?.version === SERVER.version ? selected : instances.find((i) => i.version === SERVER.version)
+  // На сервер — сборкой сервера, иначе выбранной или любой той же версии
+  const serverInstance =
+    instances.find((i) => i.serverPack) ??
+    (selected?.version === SERVER.version ? selected : instances.find((i) => i.version === SERVER.version))
   const recent = [...instances].sort((a, b) => (b.lastPlayed ?? b.createdAt) - (a.lastPlayed ?? a.createdAt)).slice(0, 4)
   const heroImage = news?.[0]?.image
   const busy = game.status !== 'idle'

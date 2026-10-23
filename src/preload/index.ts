@@ -38,7 +38,10 @@ const api: DLApi = {
     remove: (id) => invoke('instances:remove', id),
     openFolder: (id, sub) => invoke('instances:openFolder', id, sub),
     worlds: (id) => invoke('instances:worlds', id),
-    screenshots: (id) => invoke('instances:screenshots', id)
+    screenshots: (id) => invoke('instances:screenshots', id),
+    packMods: (id) => invoke('instances:packMods', id),
+    setPackMod: (id, slug, enabled) => invoke('instances:setPackMod', id, slug, enabled),
+    createServerInstance: () => invoke('instances:createServerInstance')
   },
   content: {
     list: (id, kind) => invoke('content:list', id, kind),

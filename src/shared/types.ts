@@ -31,6 +31,10 @@ export interface Instance {
   lastPlayed?: number
   /** Сколько миллисекунд наиграно всего */
   playTimeMs?: number
+  /** Сборка сервера: лаунчер сам держит в ней моды из remote.json */
+  serverPack?: boolean
+  /** Выбор игрока по необязательным модам сборки сервера: slug → включён */
+  packOptions?: Record<string, boolean>
 }
 
 export interface NewInstance {
@@ -244,11 +248,40 @@ export interface Announcement {
   url?: string
 }
 
+/** Мод из сборки сервера (slug на Modrinth) */
+export interface ServerPackMod {
+  slug: string
+  /** Можно ли выключить; обязательные стоят всегда */
+  optional?: boolean
+  /** Включён ли необязательный мод по умолчанию */
+  default?: boolean
+  /** Пояснение для игрока, если нужно (иначе берём описание с Modrinth) */
+  note?: string
+}
+
+export interface ServerPack {
+  version: string
+  loader: LoaderType
+  /** Растёт при каждом изменении состава — для показа «сборка обновилась» */
+  revision: number
+  mods: ServerPackMod[]
+}
+
 export interface RemoteConfig {
   server: { name: string; motd: string; host: string; port?: number; version: string; slots: number }
   /** Адрес плагина скинов на сервере, например http://host:port */
   skinServer: string | null
   announcements: Announcement[]
+  /** Сборка модов сервера: лаунчер держит её в сборке, помеченной serverPack */
+  serverPack?: ServerPack | null
+}
+
+/** Мод сборки сервера с данными Modrinth и выбором игрока */
+export interface ServerPackModView extends ServerPackMod {
+  title: string
+  description: string
+  iconUrl?: string
+  enabled: boolean
 }
 
 /* ---------- Профиль игрока с сервера (плагин DLauncherSkins) ---------- */
@@ -333,6 +366,11 @@ export interface DLApi {
     openFolder(id: string, sub?: string): Promise<void>
     worlds(id: string): Promise<WorldInfo[]>
     screenshots(id: string): Promise<Screenshot[]>
+    /** Моды сборки сервера для этой сборки */
+    packMods(id: string): Promise<ServerPackModView[]>
+    setPackMod(id: string, slug: string, enabled: boolean): Promise<ServerPackModView[]>
+    /** Создать сборку сервера (если её ещё нет) */
+    createServerInstance(): Promise<Instance>
   }
   content: {
     list(instanceId: string, kind: ContentKind): Promise<ContentItem[]>

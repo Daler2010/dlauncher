@@ -1,17 +1,17 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import type { ContentItem, ContentKind, Instance, Screenshot, WorldInfo } from '@shared/types'
+import type { ContentItem, ContentKind, Instance, Screenshot, ServerPackModView, WorldInfo } from '@shared/types'
 import { formatPlayTime, LOADER_LABEL, timeAgo } from '../art'
 import { Icon } from '../components/Icon'
 import { Cover } from '../components/Shell'
 import { Button, Field, Range, Segmented, Spinner, Switch, Tabs, Toggle } from '../components/ui'
 import { cleanError, useApp } from '../store'
 
-type Tab = 'content' | 'worlds' | 'screens' | 'settings'
+type Tab = 'pack' | 'content' | 'worlds' | 'screens' | 'settings'
 
 export function InstancePage(): React.JSX.Element {
   const { instances, openInstanceId, go, play, game } = useApp()
   const inst = instances.find((i) => i.id === openInstanceId)
-  const [tab, setTab] = useState<Tab>('content')
+  const [tab, setTab] = useState<Tab>(inst?.serverPack ? 'pack' : 'content')
 
   if (!inst) {
     return (
@@ -46,6 +46,11 @@ export function InstancePage(): React.JSX.Element {
                 <Icon name="box" size={11} /> модпак
               </span>
             )}
+            {inst.serverPack && (
+              <span className="chip lime">
+                <Icon name="server" size={11} /> сборка сервера
+              </span>
+            )}
             {inst.optimized && (
               <span className="chip lime">
                 <Icon name="zap" size={11} /> оптимизирована
@@ -77,17 +82,109 @@ export function InstancePage(): React.JSX.Element {
           value={tab}
           onChange={setTab}
           tabs={[
+            ...(inst.serverPack ? [{ value: 'pack' as const, label: 'Сборка сервера' }] : []),
             { value: 'content', label: 'Контент' },
             { value: 'worlds', label: 'Миры' },
             { value: 'screens', label: 'Скриншоты' },
             { value: 'settings', label: 'Настройки' }
           ]}
         />
+        {tab === 'pack' && <PackTab inst={inst} />}
         {tab === 'content' && <ContentTab inst={inst} />}
         {tab === 'worlds' && <WorldsTab inst={inst} />}
         {tab === 'screens' && <ScreensTab inst={inst} />}
         {tab === 'settings' && <SettingsTab inst={inst} />}
       </div>
+    </div>
+  )
+}
+
+/** Моды сборки сервера: обязательные и переключаемые */
+function PackTab({ inst }: { inst: Instance }): React.JSX.Element {
+  const { notify } = useApp()
+  const [mods, setMods] = useState<ServerPackModView[] | null>(null)
+  const [busy, setBusy] = useState<string | null>(null)
+
+  useEffect(() => {
+    void window.dl.instances.packMods(inst.id).then(setMods)
+  }, [inst.id])
+
+  if (!mods) {
+    return (
+      <div style={{ display: 'grid', gap: 8 }}>
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} className="skeleton" style={{ height: 58 }} />
+        ))}
+      </div>
+    )
+  }
+  if (mods.length === 0) {
+    return (
+      <div className="empty">
+        <b>Сборка сервера сейчас не задана</b>
+        Когда админ опубликует набор модов, лаунчер поставит их сам.
+      </div>
+    )
+  }
+
+  const toggle = async (slug: string, enabled: boolean): Promise<void> => {
+    setBusy(slug)
+    try {
+      setMods(await window.dl.instances.setPackMod(inst.id, slug, enabled))
+      notify(enabled ? 'Мод добавится при следующем запуске' : 'Мод уберётся при следующем запуске')
+    } catch (e) {
+      notify(cleanError(e), 'error')
+    }
+    setBusy(null)
+  }
+
+  const required = mods.filter((m) => !m.optional)
+  const optional = mods.filter((m) => m.optional)
+  const row = (m: ServerPackModView): React.JSX.Element => (
+    <div key={m.slug} className={'content-row' + (m.enabled ? '' : ' off')}>
+      {m.iconUrl ? <img className="icon" src={m.iconUrl} alt="" loading="lazy" /> : <div className="icon" />}
+      <div style={{ minWidth: 0 }}>
+        <div className="t">{m.title}</div>
+        <div className="f" style={{ fontFamily: 'var(--ui)', fontSize: 12.5 }}>
+          {m.description}
+        </div>
+      </div>
+      <span />
+      <div className="acts">
+        {m.optional ? (
+          <Toggle on={m.enabled} title={m.enabled ? 'Выключить' : 'Включить'} onChange={(v) => busy === null && void toggle(m.slug, v)} />
+        ) : (
+          <span className="chip">всегда</span>
+        )}
+      </div>
+    </div>
+  )
+
+  return (
+    <div style={{ paddingBottom: 30 }}>
+      <div className="note" style={{ marginTop: 0, marginBottom: 18 }}>
+        <Icon name="server" size={16} />
+        <div>
+          Эту сборку собрали для сервера: лаунчер сам ставит и обновляет моды при каждом запуске, а если мод уберут из
+          сборки — удалит его. Свои моды можно добавлять на вкладке «Контент», их лаунчер не трогает.
+        </div>
+      </div>
+      <div className="section-title">
+        <h2>В сборке</h2>
+        <span className="label">{required.length} модов</span>
+      </div>
+      <div className="content-list" style={{ marginBottom: 22 }}>
+        {required.map(row)}
+      </div>
+      {optional.length > 0 && (
+        <>
+          <div className="section-title">
+            <h2>По желанию</h2>
+            <span className="label">включаются переключателем</span>
+          </div>
+          <div className="content-list">{optional.map(row)}</div>
+        </>
+      )}
     </div>
   )
 }

@@ -9,12 +9,24 @@ import { save, store } from '../store'
 
 const DEFAULT_VERSION = '1.21.1'
 
-/** При первом запуске создаём оптимизированную сборку под версию сервера */
+/** При первом запуске создаём сборку сервера; у старых установок помечаем ею «Анархию» */
 export function ensureDefaultInstance(): void {
-  if (store.instances.length > 0) return
-  const inst = createInstance({ name: 'Анархия 1.21.1', version: DEFAULT_VERSION, loader: 'fabric', optimized: true })
-  store.settings.selectedInstanceId = inst.id
-  save()
+  if (store.instances.length === 0) {
+    const inst = createInstance(
+      { name: 'Анархия 1.21.1', version: DEFAULT_VERSION, loader: 'fabric', optimized: true },
+      { serverPack: true }
+    )
+    store.settings.selectedInstanceId = inst.id
+    save()
+    return
+  }
+  if (!store.instances.some((i) => i.serverPack)) {
+    const anarchy = store.instances.find((i) => i.name === 'Анархия 1.21.1' && i.loader === 'fabric' && !i.modpack)
+    if (anarchy) {
+      anarchy.serverPack = true
+      save()
+    }
+  }
 }
 
 export function listInstances(): Instance[] {

@@ -16,6 +16,7 @@ import { addPlayTime, getInstance, touchInstance } from './instances'
 import { INSTALL_STAGES, prepareVersion, recommendedLoader } from './install'
 import { ensureMods } from './modrinth'
 import { optimizedJvmFlags, PERF_MODS, writeDefaultOptions } from './optimize'
+import { packApplies, packSlugs } from './serverpack'
 import { InstallRunner, type ProgressSink } from './progress'
 
 export interface GameEvents {
@@ -69,9 +70,14 @@ export async function launchGame(req: LaunchRequest, events: GameEvents): Promis
     mkdirSync(gamePath, { recursive: true })
     if (inst.loader !== 'vanilla') {
       // Служебные моды: оптимизация (если включена) и CustomSkinLoader — свой скин и скины других игроков
-      const { skinServer } = await getRemote()
+      const { skinServer, serverPack } = await getRemote()
       const needSkins = Boolean(activeSkin() || skinServer)
-      const slugs = [...(inst.optimized ? PERF_MODS.map((m) => m.slug) : []), ...(needSkins ? [SKIN_MOD] : [])]
+      const slugs = [
+        ...(inst.optimized ? PERF_MODS.map((m) => m.slug) : []),
+        ...(needSkins ? [SKIN_MOD] : []),
+        // Сборка сервера: моды из remote.json (обязательные + выбранные игроком)
+        ...(packApplies(inst, serverPack) ? packSlugs(inst, serverPack) : [])
+      ]
       if (slugs.length) await ensureMods(gamePath, slugs, inst.version, inst.loader, runner)
       if (needSkins && (await applySkinToInstance(gamePath, account.name))) say('Скин и плащ подключены через CustomSkinLoader')
       void syncSkin()

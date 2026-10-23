@@ -1,23 +1,15 @@
 import { readFile, writeFile } from 'fs/promises'
 import { join } from 'path'
 import type { RemoteConfig } from '@shared/types'
+import bundled from '../../remote.json'
 import { dataDir } from './paths'
 
 /** Конфиг лежит в репозитории: адрес сервера, сервер скинов и анонсы меняются без новой версии лаунчера */
 const URL = 'https://raw.githubusercontent.com/Daler2010/dlauncher/main/remote.json'
 const cacheFile = join(dataDir, 'remote-cache.json')
 
-export const DEFAULT_REMOTE: RemoteConfig = {
-  server: {
-    name: 'Анархия',
-    motd: 'Выживание без правил: кланы, дуэли, аирдропы, кейсы.',
-    host: 'practically-edges.tun.ply.gg',
-    version: '1.21.1',
-    slots: 30
-  },
-  skinServer: null,
-  announcements: []
-}
+/** Встроенная копия remote.json на момент сборки — если GitHub недоступен */
+export const DEFAULT_REMOTE = bundled as RemoteConfig
 
 let cache: { at: number; config: RemoteConfig } | null = null
 

@@ -29,6 +29,7 @@ import { loaderVersions } from './game/install'
 import { gameState, killGame, launchGame, type GameEvents } from './game/launch'
 import { getProject, installProject, searchProjects } from './game/modrinth'
 import { installModpack } from './game/modpack'
+import { createServerInstance, packMods, setPackMod } from './game/serverpack'
 import { listVersions } from './game/versions'
 import { listNews } from './news'
 import { dataDir, instanceDir } from './paths'
@@ -129,6 +130,9 @@ function registerIpc(): void {
   ipcMain.handle('instances:openFolder', (_e, id: string, sub?: string) => openInstanceFolder(id, sub))
   ipcMain.handle('instances:worlds', (_e, id: string) => listWorlds(id))
   ipcMain.handle('instances:screenshots', (_e, id: string) => listScreenshots(id))
+  ipcMain.handle('instances:packMods', (_e, id: string) => packMods(id))
+  ipcMain.handle('instances:setPackMod', (_e, id: string, slug: string, enabled: boolean) => setPackMod(id, slug, enabled))
+  ipcMain.handle('instances:createServerInstance', () => createServerInstance())
 
   ipcMain.handle('content:list', (_e, id: string, kind: ContentKind) => listContent(id, kind))
   ipcMain.handle('content:toggle', (_e, id: string, kind: ContentKind, file: string) => toggleContent(id, kind, file))

@@ -7,8 +7,9 @@ import { Button, Field, Modal, Segmented, Switch } from '../components/ui'
 import { cleanError, useApp } from '../store'
 
 export function Library(): React.JSX.Element {
-  const { instances, settings, openInstance, play, game, openDiscover } = useApp()
+  const { instances, settings, openInstance, play, game, openDiscover, reloadInstances } = useApp()
   const [creating, setCreating] = useState(false)
+  const hasServerPack = instances.some((i) => i.serverPack)
   const sorted = [...instances].sort((a, b) => (b.lastPlayed ?? b.createdAt) - (a.lastPlayed ?? a.createdAt))
   const totalTime = instances.reduce((s, i) => s + (i.playTimeMs ?? 0), 0)
 
@@ -30,6 +31,24 @@ export function Library(): React.JSX.Element {
         </Button>
       </div>
 
+      {!hasServerPack && (
+        <div className="note" style={{ marginTop: 0, marginBottom: 18, alignItems: 'center' }}>
+          <Icon name="server" size={16} />
+          <div style={{ flex: 1 }}>Сборка сервера — моды, которые собрали для Анархии. Ставится и обновляется сама.</div>
+          <Button
+            variant="lime"
+            size="sm"
+            onClick={async () => {
+              const inst = await window.dl.instances.createServerInstance()
+              await reloadInstances()
+              openInstance(inst.id)
+            }}
+          >
+            Установить
+          </Button>
+        </div>
+      )}
+
       <div className="lib-grid">
         {sorted.map((inst) => (
           <div key={inst.id} className={'inst-card' + (inst.id === settings?.selectedInstanceId ? ' selected' : '')} onClick={() => openInstance(inst.id)}>
@@ -50,6 +69,11 @@ export function Library(): React.JSX.Element {
               <div className="row">
                 <span className="chip">{inst.version}</span>
                 <span className="chip">{LOADER_LABEL[inst.loader]}</span>
+                {inst.serverPack && (
+                  <span className="chip lime">
+                    <Icon name="server" size={10} /> сервер
+                  </span>
+                )}
                 {inst.optimized && (
                   <span className="chip lime">
                     <Icon name="zap" size={10} />
