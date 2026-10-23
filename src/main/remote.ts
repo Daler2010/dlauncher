@@ -21,7 +21,33 @@ export const DEFAULT_REMOTE: RemoteConfig = {
 
 let cache: { at: number; config: RemoteConfig } | null = null
 
+/** Плагин DLauncher на этом же ПК (у владельца сервера) — по умолчанию порт 8765 */
+const LOCAL_SERVER = 'http://127.0.0.1:8765'
+let localProbe: { at: number; ok: boolean } | null = null
+
+async function localServerUp(): Promise<boolean> {
+  if (localProbe && Date.now() - localProbe.at < 30_000) return localProbe.ok
+  let ok = false
+  try {
+    ok = (await fetch(`${LOCAL_SERVER}/api/ping`, { signal: AbortSignal.timeout(1500) })).ok
+  } catch {
+    // плагина на этом ПК нет
+  }
+  localProbe = { at: Date.now(), ok }
+  return ok
+}
+
+/**
+ * Конфиг с подставленным сервером DLauncher: если в remote.json адрес не задан,
+ * но сервер запущен на этом же компьютере — берём локальный.
+ */
 export async function getRemote(): Promise<RemoteConfig> {
+  const config = await loadRemote()
+  if (!config.skinServer && (await localServerUp())) return { ...config, skinServer: LOCAL_SERVER }
+  return config
+}
+
+async function loadRemote(): Promise<RemoteConfig> {
   // Для разработки: DL_REMOTE_FILE=путь к локальному remote.json
   const local = process.env['DL_REMOTE_FILE']
   if (local) return { ...DEFAULT_REMOTE, ...JSON.parse(await readFile(local, 'utf8')) }
