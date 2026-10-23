@@ -3,6 +3,9 @@ productName: DLauncher
 directories:
   buildResources: build
   output: dist
+# Electron из node_modules: свежераспакованный архив Защитник Windows держит при проверке,
+# и электрон-билдер падает с EPERM на переименовании win-unpacked.tmp
+electronDist: node_modules/electron/dist
 files:
   - out/**
   - package.json
